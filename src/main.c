@@ -1,9 +1,10 @@
-﻿// Open new game : –n –s new_game_file_name
+// Open new game : –n –s new_game_file_name
 // Load game : –l old_game_file_name
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 #include "backprop.h"
 #include "board.h"
 #include "goma.h"
@@ -11,7 +12,7 @@
 
 int para;
 FILE *fp = NULL;
-BOARD **ptboard = NULL;
+NODE* list = NULL;
 char *condition = NULL;
 
 int main(int argc, char *argv[]) {
@@ -24,12 +25,12 @@ int main(int argc, char *argv[]) {
             case 'n':
                 printf("[Open new game]\n");
                 Open_new_game(fp,argv[3]);
-                game_start();
+                game_start(argv[3]);
                 break;
             case 'l':
                 printf("[Reload old game]\n");
                 Reload_old_game(fp,argv[2]);
-                // read_board
+                // `read_board
                 break;
             case '?':
                 printf("Unknown parameter.\n");
@@ -41,7 +42,8 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void game_start(){
+void game_start(char *gname){
+    // initial setting
     char result = NA;
     int turns = 1;
     int player = X;
@@ -70,8 +72,20 @@ void game_start(){
     do{
         printf("[Turn%d]\n",turns);
         printf("[Player %c]\n",(player)? 'y':'x');
-        goma_move(player);
+        // regret?
+        // if(turns > 2){
+        //     printf("Would you like to regret?[y/n]:\n");
+        //     if(getchar() == 'y'){
+        //         printf("Regreting...\n\n");
+        //         turns = turns - 2;
+        //         getchar();
+        //         continue;
+        //     }
+        // }
+
+        goma_move(player,gname);
         visualize_board(ptboard);
+        // change player
         player = !player;
         turns++;
     }while(result == NA);
@@ -85,7 +99,7 @@ void game_start(){
 
 }
 
-void goma_move(int user){
+void goma_move(int user,char *gname){
     int *ptx = (int*)malloc(2*sizeof(int));
     int *pty = (int*)malloc(2*sizeof(int));
     BOARD *pre_select = (BOARD*)malloc(sizeof(BOARD));
@@ -95,12 +109,11 @@ void goma_move(int user){
     do{
         do{   
             printf("Please enter the initial position:");
-            scanf("%d",ptx);
-            scanf("%d",pty);
+            scanf(" %d",ptx);
+            scanf(" %d",pty);
             pre_select = &ptboard[*pty - 1][ROW - *ptx];
-                 
             if(*ptx <= 0 || *pty <= 0 || *ptx > ROW || *pty > COLUMN){
-                printf("\n\033[31m[Error 0]:This position does not exist.\033[m\nPlease try again.\n\n");
+                printf("\n\033[31m[Error 1]:This position does not exist.\033[m\nPlease try again.\n\n");
             }
             else if(pre_select->goma == NULL){
                 printf("\n\033[31m[Error 1]:There is empty.\033[m\nPlease try again.\n\n");
@@ -118,28 +131,29 @@ void goma_move(int user){
                 printf("\n\n");
                 break;
             }
+
         }while(TRUE);
 
         // feed new position
         do{   
             printf("Please enter the new position:");
-            scanf("%d",ptx+1);
-            scanf("%d",pty+1);
+            scanf(" %d",ptx+1);
+            scanf(" %d",pty+1);
             new_select = &ptboard[*(pty+1) - 1][ROW - *(ptx+1)];
 
             if(*(ptx+1) <= 0 || *(pty+1) <= 0 || *(ptx+1) > ROW || *(pty+1) > COLUMN){
-                printf("\n\033[31m[Error 0]:This position does not exist.\033[m\nPlease try again.\n\n");
+                printf("\n\033[31m[Error 1]:This position does not exist.\033[m\nPlease try again.\n\n");
+                new_select = NULL;
             }
             else if(new_select->owner == pre_select->owner){
-                printf("\n\033[31m[Error 3]You cannot eat your own chess.\033[m\nPlease try again.\n\n");
+                printf("\n\033[31m[Error 2]You cannot eat your own chess.\033[m\nPlease try again.\n\n");
+                new_select = NULL;
+            }  
+            else if(pre_select->goma->act(pre_select->owner, ptx, pty, OFF)){
+                new_select = NULL;
             }
-            // else if((pre_select->chess->action(user,(int8_t)(*(x+1) - *x), (int8_t)(*(y+1) - *y)))){
-            //     continue;
-            // }else if(detect_path(pre_select,x, y)){
-            //     printf("\nPath Error.");
-            //     continue;
-            // }
             else{
+                // detect_path(ptx,pty);
                 printf("Select ");
                 if(new_select->owner == 'x'){
                     print_xgoma(new_select->goma->syb);
@@ -150,9 +164,8 @@ void goma_move(int user){
                 }
                 printf("[%d][%d]", *(ptx+1), *(pty+1));
                 printf("\n\n");
-                break;
             }
-        }while(TRUE);
+        }while(new_select == NULL);
 
         if(pre_select->owner == 'x'){
             print_xgoma(pre_select->goma->syb);
@@ -161,30 +174,40 @@ void goma_move(int user){
         }
         printf("[%d][%d]->[%d][%d]?\n",*ptx, *pty, *(ptx+1), *(pty+1));
 
-        printf("\nWould you like to re-select?[y/n]:");
-        scanf(" %c",condition);
-        if(*condition == 'y'){
-            printf("\n");
-            continue;
-        }
-        print_step(pre_select,*ptx,*pty);
-        break;
-    }while(pre_select == NULL || new_select == NULL || *condition == 'y');
-    swap(pre_select,new_select);
-}
+        do{
+            printf("\nWould you like to re-select?[y/n]:");
+            scanf(" %c",condition);
+            if(*condition == 'y'){
+                printf("\n");
+                break;
+            }else if(*condition == 'n'){
+                printf("\n");
+                break;
+            }else{
+                printf("Please enter 'y' or 'n'.\n");
+                *condition = NA;
+            }
+        }while(*condition == NA);
 
+    }while(pre_select == NULL || new_select == NULL || *condition == 'y');
+    list = Add_to_list(list,ptx,pty);
+    write_file(fp, gname, ptx, pty);
+    swap(pre_select,new_select);
+    printf("%s move from [%d][%d] to [%d][%d]\n",list->old_pos.goma->syb,*(list->cx),*(list->cy),*(list->cx+1),*(list->cy+1));
+    // print_step(new_select,*ptx,*pty);
+}
 
 
 void free_mem(){
     free(ptboard);
-    free(PAWN);
-    free(LANCE);
-    free(KNIGHT);
-    free(SLIVER);
-    free(GOLD);
-    free(KING);
-    free(ROOK);
-    free(BISHOP);
+    // free(PAWN);
+    // free(LANCE);
+    // free(KNIGHT);
+    // free(SLIVER);
+    // free(GOLD);
+    // free(KING);
+    // free(ROOK);
+    // free(BISHOP);
 }
 
 void print_step(BOARD* sel, int x, int y){
@@ -211,13 +234,14 @@ void print_step(BOARD* sel, int x, int y){
     }
     if(sel->owner == 'x'){
         print_xgoma("▲");
-        printf("\033[31m%d%s\033[m",x,output);
+        printf("\033[31m%d%s\033[m ",x,output);
         print_xgoma(sel->goma->syb);
         printf("\n");
     }else{
         print_ygoma("△");
-        printf("\033[34m%d\033[m ",x);
+        printf("\033[34m%d%s\033[m ",x,output);
         print_ygoma(sel->goma->syb);
+        printf("\n");
     } 
     printf("============================\n");
 }
