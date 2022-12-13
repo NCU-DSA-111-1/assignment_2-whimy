@@ -1,4 +1,4 @@
-﻿#include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include "board.h"
@@ -69,6 +69,10 @@ void init_board(BOARD** ptb){
         ptb[6][r].owner = 'x';
     } 
 
+    for(int c = 0;c<COLUMN;c++){
+        for(int r = 0;r<ROW;r++)
+        ptb[c][r].number = c*9+r;
+    }
 }
 
 void visualize_board(BOARD** const ptb){
@@ -127,3 +131,4 @@ void swap(BOARD* origin, BOARD *goal){
         *origin = *temp;
     }
 }
+
