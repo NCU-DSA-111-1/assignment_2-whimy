@@ -1,4 +1,4 @@
-﻿// Board information, update board, goma_move
+// Board information, update board, goma_move
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
@@ -11,10 +11,14 @@
 typedef struct board_t{
     char owner;
     GOMA* goma;
+    int number;
 }BOARD;
+
+BOARD **ptboard;
 
 void init_board(BOARD** ptb);
 void visualize_board(BOARD** const ptb);
 void swap(BOARD* origin, BOARD *goal);
+
 
 #endif
