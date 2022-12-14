@@ -14,6 +14,7 @@ int para;
 FILE *fp = NULL;
 NODE* list = NULL;
 char *condition = NULL;
+int regret;
 
 int main(int argc, char *argv[]) {
     // detect which program to execute
@@ -73,18 +74,28 @@ void game_start(char *gname){
         printf("[Turn%d]\n",turns);
         printf("[Player %c]\n",(player)? 'y':'x');
         // regret?
-        // if(turns > 2){
-        //     printf("Would you like to regret?[y/n]:\n");
-        //     if(getchar() == 'y'){
-        //         printf("Regreting...\n\n");
-        //         turns = turns - 2;
-        //         getchar();
-        //         continue;
-        //     }
-        // }
-
+        if(turns > 2){
+            printf("Would you like to regret?[0/1]:");
+            scanf(" %d", &regret);
+            if(!regret){
+                printf("Regreting...\n\n");
+                list = Remove_from_list(list, (player)? x_bag:y_bag);
+                list = Remove_from_list(list, (player)? y_bag:x_bag);
+                turns = turns - 2;
+                visualize_board(ptboard);
+                continue;
+            }
+        }
         goma_move(player,gname);
         visualize_board(ptboard);
+        if(list->new_pos.goma == King){
+            if(list->new_pos.owner == 'y'){
+                printf("Player x win!\n");
+            }else{
+                printf("Player y win!\n");
+            }
+        }
+
         // change player
         player = !player;
         turns++;
