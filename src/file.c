@@ -75,6 +75,30 @@ NODE* Add_to_list(NODE* head, int *px, int *py){
 }
 
 
+NODE* Remove_from_list(NODE* head, BAG *ptbag){
+    NODE *rel;
+    BOARD *temp = malloc(sizeof(BOARD));
+    rel = (NODE*)malloc(sizeof(NODE));
+    rel->cx = head->cx;     rel->cy = head->cy;
+    rel->new_pos = head->new_pos;   rel->old_pos = head->old_pos;
+    rel->next = head->next;
+    head = rel->next;
+    // printf("%s move from [%d][%d] to [%d][%d]\n", rel->old_pos.goma->syb, *(rel->cx), *(rel->cy), *(rel->cx+1), *(rel->cy+1));
+    if(rel->new_pos.goma != NULL){
+        ptboard[*(rel->cy+1) - 1][ROW - *(rel->cx+1)] = rel->new_pos;
+        ptboard[*(rel->cy) - 1][ROW - *(rel->cx)] = rel->old_pos;
+        ptbag->mochi[ptbag->top] = *Empty;
+        ptbag->top--;
+    }else{
+        *temp = ptboard[*(rel->cy+1) - 1][ROW - *(rel->cx+1)];
+        ptboard[*(rel->cy+1) - 1][ROW - *(rel->cx+1)] = ptboard[*(rel->cy) - 1][ROW - *(rel->cx)];
+        ptboard[*(rel->cy) - 1][ROW - *(rel->cx)] = *temp;
+    }
+
+
+    free(rel);
+    return head;
+}
 
 void write_file(FILE* fp, char *fname, int* px, int* py){
     // 寫入先後手
