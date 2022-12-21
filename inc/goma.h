@@ -18,10 +18,9 @@
 typedef int (*func)(char,int*,int*,char);
 
 typedef struct goma_t{
+    char icon;
     char *syb;
     func act;
-    // char *pro_syb;
-    // func pro_act;
 }GOMA;
 
 typedef struct bag_t{
