@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "board.h"
 #include "goma.h"
+#include "file.h"
 
 // initialize board
 void init_board(BOARD** ptb){
@@ -131,4 +132,3 @@ void swap(BOARD* origin, BOARD *goal){
         *origin = *temp;
     }
 }
-
