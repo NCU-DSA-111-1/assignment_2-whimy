@@ -10,28 +10,37 @@ void generate_goma(){
     Pawn = (GOMA*)malloc(sizeof(GOMA));
     Pawn->syb = PAWN;
     Pawn->act = &detect_Pawn;
+    Pawn->icon = 'p';
     Lance = (GOMA*)malloc(sizeof(GOMA));
     Lance->syb = LANCE;
     Lance->act = &detect_Lance;
+    Lance->icon = 'l';
     Knight = (GOMA*)malloc(sizeof(GOMA));
     Knight->syb = KNIGHT;
     Knight->act = &detect_Knight;
+    Knight->icon = 'n';
     Sliver = (GOMA*)malloc(sizeof(GOMA));
     Sliver->syb = SLIVER;
     Sliver->act = &detect_Sliver;
+    Sliver->icon = 's';
     Gold = (GOMA*)malloc(sizeof(GOMA));
     Gold->syb = GOLD;
     Gold->act = &detect_Gold;
+    Gold->icon = 'g';
     King = (GOMA*)malloc(sizeof(GOMA));
     King->syb = KING;
     King->act = &detect_King;
+    King->icon = 'k';
     Rook = (GOMA*)malloc(sizeof(GOMA));
     Rook->syb = ROOK;
     Rook->act = &detect_Rook;
+    Rook->icon = 'r';
     Bishop = (GOMA*)malloc(sizeof(GOMA));
     Bishop->syb = BISHOP;
     Bishop->act = &detect_Bishop;
-    // Empty = (GOMA*)malloc(sizeof(GOMA));
+    Bishop->icon = 'b';
+    Empty = (GOMA*)malloc(sizeof(GOMA));
+    Empty->syb = EMPTY;
 }
 
 BAG* init_bag(BAG* ptbag){
