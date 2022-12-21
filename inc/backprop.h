@@ -16,8 +16,11 @@
 
 
 void game_start(char *gname);
-void goma_move(int user,char *gname);
+void goma_move(char *gname);
 void print_step(BOARD* sel, int x, int y);
 void free_mem();
+static void timeout_cbX(EV_P_ ev_timer *w, int revents);
+static void timeout_cbY(EV_P_ ev_timer *w, int revents);
+static void stdin_cb(EV_P_ ev_io *w, int revents);
 
 #endif
