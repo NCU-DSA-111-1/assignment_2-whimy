@@ -11,6 +11,10 @@
 #include "goma.h"
 #include "file.h"
 
+static void timeout_cbX(EV_P_ ev_timer *w, int revents);
+static void timeout_cbY(EV_P_ ev_timer *w, int revents);
+static void stdin_cb(EV_P_ ev_io *w, int revents);
+
 int para;
 FILE *fp = NULL;
 NODE* list = NULL;
@@ -32,7 +36,7 @@ int main(int argc, char *argv[]) {
             // Open new game
             case 'n':
                 printf("[Open new game]\n");
-                Open_new_game(fp,argv[3]);
+                fp = Open_new_game(fp,argv[3]);
                 game_start(argv[3]);
                 break;
             case 'l':
@@ -46,6 +50,7 @@ int main(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
         } 
     } 
+    
     printf("Successfully execute!\nExit program.");
     return 0;
 }
@@ -93,6 +98,7 @@ void game_start(char *gname){
             if(!regret){
                 printf("Regreting...\n\n");
                 list = Remove_from_list(list, (player)? x_bag:y_bag);
+                Remove_from_file(fp,gname);
                 list = Remove_from_list(list, (player)? y_bag:x_bag);
                 turns = turns - 2;
                 visualize_board(ptboard);
@@ -108,8 +114,14 @@ void game_start(char *gname){
         if(list->new_pos.goma == King){
             if(list->new_pos.owner == 'y'){
                 printf("Player x win!\n");
+                printf("\nClosing game...\n\n");
+                fclose(fp);
+                exit(EXIT_SUCCESS);
             }else{
                 printf("Player y win!\n");
+                printf("\nClosing game...\n\n");
+                fclose(fp);
+                exit(EXIT_SUCCESS);
             }
         }
 
@@ -118,12 +130,6 @@ void game_start(char *gname){
         turns++;
     }while(result == NA);
     
-    if(result == 'x'){
-        printf("player x wins!\n");
-    }else{
-        printf("Player y wins!\n");
-    }
-    printf("\nClosing game...\n\n");
 
 }
 
@@ -181,7 +187,6 @@ void goma_move(char *gname){
                 new_select = NULL;
             }
             else{
-                // detect_path(ptx,pty);
                 printf("Select ");
                 if(new_select->owner == 'x'){
                     print_xgoma(new_select->goma->syb);
@@ -228,13 +233,11 @@ void goma_move(char *gname){
     if(*condition == 's' || *condition == 'S'){
         printf("Saving...\n\n");
         printf("Saving completed.\nGoodbye.\n");
+        fclose(fp);
         exit(EXIT_SUCCESS);
     }
 }
 
-void free_mem(){
-    free(ptboard);
-}
 
 void print_step(BOARD* sel, int x, int y){
     printf("============================\n");
