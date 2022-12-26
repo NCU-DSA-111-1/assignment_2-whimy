@@ -8,10 +8,10 @@
 char buffer[10];
 
 // open new game
-void Open_new_game(FILE* fp,char *fname){
+FILE* Open_new_game(FILE* fp,char *fname){
     char c;
     printf("Creating file...\n\n");
-    strcat(fname,".csv");
+    strcat(fname,".txt");
     if(!access(fname,0)){
         printf("This file name have already exist.\n");
         do{
@@ -28,7 +28,6 @@ void Open_new_game(FILE* fp,char *fname){
                     printf("Open file successfully.\n");
                     
                 }
-                fclose(fp);
                 break;
             }else{
                 printf("Please enter 'y' or 'n'.\n");
@@ -36,11 +35,12 @@ void Open_new_game(FILE* fp,char *fname){
             }
         }while(c != 'y' && c != 'n');
     }
+    return fp;
 }
 
 void Reload_old_game(FILE* fp,char *fname){
     printf("Reloading...\n\n");
-    strcat(fname,".csv");
+    strcat(fname,".txt");
     if(access(fname,0)){
         printf("This file does not exist.\nWould you like to open a new game?\n");
         printf("You could open a new game by entering $./shogi –n –s {$new_game_file_name}\n");
@@ -83,7 +83,6 @@ NODE* Remove_from_list(NODE* head, BAG *ptbag){
     rel->new_pos = head->new_pos;   rel->old_pos = head->old_pos;
     rel->next = head->next;
     head = rel->next;
-    // printf("%s move from [%d][%d] to [%d][%d]\n", rel->old_pos.goma->syb, *(rel->cx), *(rel->cy), *(rel->cx+1), *(rel->cy+1));
     if(rel->new_pos.goma != NULL){
         ptboard[*(rel->cy+1) - 1][ROW - *(rel->cx+1)] = rel->new_pos;
         ptboard[*(rel->cy) - 1][ROW - *(rel->cx)] = rel->old_pos;
@@ -95,15 +94,21 @@ NODE* Remove_from_list(NODE* head, BAG *ptbag){
         ptboard[*(rel->cy) - 1][ROW - *(rel->cx)] = *temp;
     }
 
-
     free(rel);
     return head;
 }
 
+void Remove_from_file(FILE *fp, char *fname){  
+    typedef struct buffer{
+        char bgoma[2];
+        int bx[2];
+        int by[2];
+    }BUFFER;
+    fseek(fp, -(sizeof(BUFFER)-1)*2, SEEK_CUR);
+}
+
 void write_file(FILE* fp, char *fname, NODE *head, int* px, int* py){
     // 寫入先後手
-    fp = fopen(fname,"a+");
-
     if(head->old_pos.goma ==  Pawn){
         fprintf(fp,"%-3c", 'p');
     }else if(head->old_pos.goma ==  Lance){
@@ -148,7 +153,6 @@ void write_file(FILE* fp, char *fname, NODE *head, int* px, int* py){
 
     fprintf(fp, "%-3d%-3d", head->cx[1], head->cy[1]);
     fprintf(fp,"\n");
-    fclose(fp);
 }
 
 
@@ -181,7 +185,6 @@ void read_file(FILE* fp, char *fname){
         printf("Turn[%d]\n",turn);
         printf("\nPress 'f' for the next step, 'b' for the back step:");
         scanf(" %c", &fb);
-        // printf("%c %d %d %c %d %d\n", (buf->bgoma[0]), (buf->bx[0]), (buf->by[0]), (buf->bgoma[1]), (buf->bx[1]), (buf->by[1]));
         if(fb == 'f'){
             if(feof(fp)){
                 printf("This is already the final step.\n");
@@ -229,5 +232,4 @@ void read_file(FILE* fp, char *fname){
     }while(1);
     printf("This is the end of the file.\n");
 }
-
 
