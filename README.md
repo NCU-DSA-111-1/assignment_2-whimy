@@ -67,3 +67,22 @@ Would you like to re-select?[y/n]:
 6. All playing data will be record in a csv file named {new_game_file_name}, which user entered while running the program.
 
 # Reference
+[Shogi rule](https://shogi.hk/Gameplay-of-Japanese-Chess-Shogi)
+
+> Basic Shogi rule
+
+[Print out with color in C](https://www.796t.com/article.php?id=190246)
+
+> Tutorial of colorful output in C
+
+[png](https://github.com/cutechess/sloppy/blob/master/src/pgn.c)
+
+> Open-Source of png
+
+[Libev](https://gohalo.me/post/linux-libev.html)
+
+> Libev introduction
+ 
+[Redis](https://github.com/redis/hiredis)
+
+> Redis introduction
